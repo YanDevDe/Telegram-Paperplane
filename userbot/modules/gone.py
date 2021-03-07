@@ -3,7 +3,7 @@
 # Licensed under the Raphielscape Public License, Version 1.d (the "License");
 # you may not use this file except in compliance with the License.
 #
-""" Userbot module which contains afk-related commands """
+""" Userbot module which contains gone-related commands """
 
 import time
 
@@ -14,30 +14,28 @@ from telethon.events import StopPropagation
 from userbot import (BOTLOG, BOTLOG_CHATID, CMD_HELP, COUNT_MSG, USERS,
                      is_redis_alive, bot)
 from userbot.events import register, grp_exclude
-from userbot.modules.dbhelper import afk, afk_reason, is_afk, is_gone, no_afk
+from userbot.modules.dbhelper import gone, gone_reason, is_gone, no_gone
 
 
 @register(incoming=True, disable_edited=True, disable_errors=True)
 @grp_exclude()
-async def mention_afk(mention):
+async def mention_gone(mention):
     """ This function takes care of notifying the
-     people who mention you that you are AFK."""
+     people who mention you that you are GONE."""
 
     global COUNT_MSG
     global USERS
     if not is_redis_alive():
         return
 
-    IsGone = await is_gone()
+    IsAway = await is_gone()
 
-    if IsGone is True:
-        return
+    printf(mention)
 
-    IsAway = await is_afk()
     if mention.message.mentioned and not (await mention.get_sender()).bot:
         if IsAway is True:
-            Reason = await afk_reason()
-            Message = "I am an Auto-Reply Bot, my boss is currently AFK from his desk but will respond to your message promptly upon return"
+            Reason = await gone_reason()
+            Message = "I am an Auto-Reply Bot, my boss is currently not there from his desk but will respond to your message promptly upon return"
 
             if Reason != "no reason":
                 Message = Message + "\n\nReason: ```" + Reason + "```"
@@ -47,8 +45,8 @@ async def mention_afk(mention):
                 USERS.update({mention.sender_id: 1})
                 COUNT_MSG = COUNT_MSG + 1
             elif mention.sender_id in USERS:
-                if USERS[mention.sender_id] % 5 == 0:
-                    await mention.reply("I am an Auto-Reply Bot, my boss is still AFK from his desk.")
+                if USERS[mention.sender_id] % 10 == 0:
+                    await mention.reply("I am an Auto-Reply Bot, my boss is still not there from his desk.")
                     USERS[mention.sender_id] = USERS[mention.sender_id] + 1
                     COUNT_MSG = COUNT_MSG + 1
                 else:
@@ -58,60 +56,55 @@ async def mention_afk(mention):
 
 @register(incoming=True, disable_errors=True)
 @grp_exclude()
-async def afk_on_pm(afk_pm):
+async def gone_on_pm(gone_pm):
     global USERS
     global COUNT_MSG
     if not is_redis_alive():
         return
 
-    IsGone = await is_gone()
-
-    if IsGone is True:
-        return
-
-    IsAway = await is_afk()
-    if afk_pm.is_private and not (await afk_pm.get_sender()).bot:
+    IsAway = await is_gone()
+    if gone_pm.is_private and not (await gone_pm.get_sender()).bot:
         if IsAway is True:
-            Reason = await afk_reason()
-            Message = "I am an Auto-Reply Bot, my boss is currently AFK from his desk but will respond to your message promptly upon return"
+            Reason = await gone_reason()
+            Message = "I am an Auto-Reply Bot, my boss is currently not there from his desk but will respond to your message promptly upon return"
 
             if Reason != "no reason":
                 Message = Message + "\n\nReason: ```" + Reason + "```"
 
-            if afk_pm.sender_id not in USERS:
-                await afk_pm.reply(Message)
-                USERS.update({afk_pm.sender_id: 1})
+            if gone_pm.sender_id not in USERS:
+                await gone_pm.reply(Message)
+                USERS.update({gone_pm.sender_id: 1})
                 COUNT_MSG = COUNT_MSG + 1
-            elif afk_pm.sender_id in USERS:
-                if USERS[afk_pm.sender_id] % 5 == 0:
-                    await afk_pm.reply(Message)
-                    USERS[afk_pm.sender_id] = USERS[afk_pm.sender_id] + 1
+            elif gone_pm.sender_id in USERS:
+                if USERS[gone_pm.sender_id] % 10 == 0:
+                    await gone_pm.reply(Message)
+                    USERS[gone_pm.sender_id] = USERS[gone_pm.sender_id] + 1
                     COUNT_MSG = COUNT_MSG + 1
                 else:
-                    USERS[afk_pm.sender_id] = USERS[afk_pm.sender_id] + 1
+                    USERS[gone_pm.sender_id] = USERS[gone_pm.sender_id] + 1
                     COUNT_MSG = COUNT_MSG + 1
 
 
-@register(outgoing=True, disable_errors=True, pattern="^.afk")
+@register(outgoing=True, disable_errors=True, pattern="^.gone")
 @grp_exclude()
-async def set_afk(setafk):
+async def set_gone(setgone):
     if not is_redis_alive():
-        await setafk.edit("`Database connections failing!`")
+        await setgone.edit("`Database connections failing!`")
         return
-    message = setafk.text
+    message = setgone.text
     try:
-        AFKREASON = str(message[5:])
+        GONEREASON = str(message[5:])
     except BaseException:
-        AFKREASON = ''
-    if not AFKREASON:
-        AFKREASON = 'no reason'
-    await setafk.delete()
+        GONEREASON = ''
+    if not GONEREASON:
+        GONEREASON = 'no reason'
+    await setgone.delete()
     if BOTLOG:
-        await setafk.client.send_message(BOTLOG_CHATID, "You went AFK!")
-    await afk(AFKREASON)
+        await setgone.client.send_message(BOTLOG_CHATID, "You went GONE!")
+    await gone(GONEREASON)
 
-    replied_user = await get_user(setafk)
-    firstname = "[AFK] " + replied_user.user.first_name
+    replied_user = await get_user(setgone)
+    firstname = "[GONE] " + replied_user.user.first_name.replace("[AFK] ", "")
     lastname = replied_user.user.last_name
 
     await bot(
@@ -124,20 +117,23 @@ async def set_afk(setafk):
     raise StopPropagation
 
 
-@register(outgoing=True, disable_errors=True)
-@grp_exclude(force_exclude=True)
-async def type_afk_is_not_true(notafk):
+@register(outgoing=True, pattern="^.back$")
+@grp_exclude()
+async def back(event):
     global COUNT_MSG
     global USERS
     if not is_redis_alive():
         return
-    IsAway = await is_afk()
+
+    IsAway = await is_gone()
     if IsAway is True:
-        await no_afk()
+        await no_gone()
 
-        replied_user = await get_user(notafk)
+        await event.delete()
 
-        firstname = replied_user.user.first_name.replace("[AFK] ", "")
+        replied_user = await get_user(event)
+
+        firstname = replied_user.user.first_name.replace("[GONE] ", "")
         lastname = replied_user.user.last_name
 
         await bot(
@@ -148,15 +144,15 @@ async def type_afk_is_not_true(notafk):
         )
 
         if BOTLOG:
-            await notafk.client.send_message(
+            await event.client.send_message(
                 BOTLOG_CHATID,
                 "You've recieved " + str(COUNT_MSG) + " messages from " +
                 str(len(USERS)) + " chats while you were away",
             )
             for i in USERS:
-                name = await notafk.client.get_entity(i)
+                name = await event.client.get_entity(i)
                 name0 = str(name.first_name)
-                await notafk.client.send_message(
+                await event.client.send_message(
                     BOTLOG_CHATID,
                     "[" + name0 + "](tg://user?id=" + str(i) + ")" +
                     " sent you " + "`" + str(USERS[i]) + " messages`",
@@ -195,10 +191,13 @@ async def get_user(event):
 
 
 CMD_HELP.update({
-    "afk": [
-        'AFK',
-        " - `.afk <reason> (optional)`: Sets your status as AFK. Responds to anyone who tags/PM's "
-        "you telling you are AFK. Switches off AFK when you type back anything."
-        "Can't be used when using actively `.gone <reason>`"
+    "gone": [
+        'GONE',
+        " - `.gone <reason> (optional)`: Sets your status as gone. Responds to anyone who tags/PM's "
+        "you telling you are gone. Switches off gone when you type `.back`."
+    ],
+    "back": [
+        'BACK',
+        " - `.back`: Switches off `.gone` status."
     ]
 })

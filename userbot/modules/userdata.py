@@ -88,18 +88,6 @@ async def set_biograph(setbio):
     await setbio.edit(BIO_SUCCESS)
 
 
-@register(outgoing=True, pattern="^.username (.*)")
-@grp_exclude()
-async def update_username(username):
-    """ For .username command, set a new username in Telegram. """
-    newusername = username.pattern_match.group(1)
-    try:
-        await bot(UpdateUsernameRequest(newusername))
-        await username.edit(USERNAME_SUCCESS)
-    except UsernameOccupiedError:
-        await username.edit(USERNAME_TAKEN)
-
-
 @register(outgoing=True, pattern=r"^.delpfp")
 @grp_exclude()
 async def remove_profilepic(delpfp):
@@ -132,7 +120,6 @@ async def remove_profilepic(delpfp):
 CMD_HELP.update({
     "userdata": [
         'Userdata',
-        " - `.username <new_username>`: Change your Telegram username.\n"
         " - `.name <firstname> or .name <firstname> <lastname>`: Change your Telegram name.\n"
         " - `.profilepic`: Change your Telegram avatar with the replied photo.\n"
         " - `.setbio <new_bio>`: Change your Telegram bio.\n"

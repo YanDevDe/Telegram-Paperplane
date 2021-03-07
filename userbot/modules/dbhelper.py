@@ -347,6 +347,25 @@ async def no_afk():
     REDIS.delete('is_afk')
 
 
+async def is_gone():
+    to_check = REDIS.get('is_gone')
+    if to_check:
+        return True
+    else:
+        return False
+
+
+async def gone(reason):
+    REDIS.set('is_gone', reason)
+
+
+async def gone_reason():
+    return strb(REDIS.get('is_gone'))
+
+
+async def no_gone():
+    REDIS.delete('is_gone')
+
 # Fbans
 
 
