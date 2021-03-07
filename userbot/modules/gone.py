@@ -30,8 +30,6 @@ async def mention_gone(mention):
 
     IsAway = await is_gone()
 
-    printf(mention)
-
     if mention.message.mentioned and not (await mention.get_sender()).bot:
         if IsAway is True:
             Reason = await gone_reason()
