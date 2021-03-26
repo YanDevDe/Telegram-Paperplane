@@ -17,43 +17,43 @@ from userbot.events import register, grp_exclude
 from userbot.modules.dbhelper import afk, afk_reason, is_afk, is_gone, no_afk
 
 
-@register(incoming=True, disable_edited=True, disable_errors=True)
-@grp_exclude()
-async def mention_afk(mention):
-    """ This function takes care of notifying the
-     people who mention you that you are AFK."""
-
-    global COUNT_MSG
-    global USERS
-    if not is_redis_alive():
-        return
-
-    IsGone = await is_gone()
-
-    if IsGone is True:
-        return
-
-    IsAway = await is_afk()
-    if mention.message.mentioned and not (await mention.get_sender()).bot:
-        if IsAway is True:
-            Reason = await afk_reason()
-            Message = "I am an Auto-Reply Bot, my boss is currently AFK from his desk but will respond to your message promptly upon return"
-
-            if Reason != "no reason":
-                Message = Message + "\n\nReason: ```" + Reason + "```"
-
-            if mention.sender_id not in USERS:
-                await mention.reply(Message)
-                USERS.update({mention.sender_id: 1})
-                COUNT_MSG = COUNT_MSG + 1
-            elif mention.sender_id in USERS:
-                if USERS[mention.sender_id] % 5 == 0:
-                    await mention.reply("I am an Auto-Reply Bot, my boss is still AFK from his desk.")
-                    USERS[mention.sender_id] = USERS[mention.sender_id] + 1
-                    COUNT_MSG = COUNT_MSG + 1
-                else:
-                    USERS[mention.sender_id] = USERS[mention.sender_id] + 1
-                    COUNT_MSG = COUNT_MSG + 1
+# @register(incoming=True, disable_edited=True, disable_errors=True)
+# @grp_exclude()
+# async def mention_afk(mention):
+#     """ This function takes care of notifying the
+#      people who mention you that you are AFK."""
+#
+#     global COUNT_MSG
+#     global USERS
+#     if not is_redis_alive():
+#         return
+#
+#     IsGone = await is_gone()
+#
+#     if IsGone is True:
+#         return
+#
+#     IsAway = await is_afk()
+#     if mention.message.mentioned and not (await mention.get_sender()).bot:
+#         if IsAway is True:
+#             Reason = await afk_reason()
+#             Message = "I am an Auto-Reply Bot, my boss is currently away from Telegram but will respond to your message promptly upon return."
+#
+#             if Reason != "no reason":
+#                 Message = Message + "\n\nReason: ```" + Reason + "```"
+#
+#             if mention.sender_id not in USERS:
+#                 await mention.reply(Message)
+#                 USERS.update({mention.sender_id: 1})
+#                 COUNT_MSG = COUNT_MSG + 1
+#             elif mention.sender_id in USERS:
+#                 if USERS[mention.sender_id] % 40 == 0:
+#                     await mention.reply("I am an Auto-Reply Bot, my boss is still AFK from his desk.")
+#                     USERS[mention.sender_id] = USERS[mention.sender_id] + 1
+#                     COUNT_MSG = COUNT_MSG + 1
+#                 else:
+#                     USERS[mention.sender_id] = USERS[mention.sender_id] + 1
+#                     COUNT_MSG = COUNT_MSG + 1
 
 
 @register(incoming=True, disable_errors=True)
@@ -73,7 +73,7 @@ async def afk_on_pm(afk_pm):
     if afk_pm.is_private and not (await afk_pm.get_sender()).bot:
         if IsAway is True:
             Reason = await afk_reason()
-            Message = "I am an Auto-Reply Bot, my boss is currently AFK from his desk but will respond to your message promptly upon return"
+            Message = "I am an Auto-Reply Bot, my boss is currently away from Telegram but will respond to your message promptly upon return."
 
             if Reason != "no reason":
                 Message = Message + "\n\nReason: ```" + Reason + "```"
@@ -83,7 +83,7 @@ async def afk_on_pm(afk_pm):
                 USERS.update({afk_pm.sender_id: 1})
                 COUNT_MSG = COUNT_MSG + 1
             elif afk_pm.sender_id in USERS:
-                if USERS[afk_pm.sender_id] % 5 == 0:
+                if USERS[afk_pm.sender_id] % 50 == 0:
                     await afk_pm.reply(Message)
                     USERS[afk_pm.sender_id] = USERS[afk_pm.sender_id] + 1
                     COUNT_MSG = COUNT_MSG + 1

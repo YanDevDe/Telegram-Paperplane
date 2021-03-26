@@ -17,39 +17,39 @@ from userbot.events import register, grp_exclude
 from userbot.modules.dbhelper import gone, gone_reason, is_gone, no_gone
 
 
-@register(incoming=True, disable_edited=True, disable_errors=True)
-@grp_exclude()
-async def mention_gone(mention):
-    """ This function takes care of notifying the
-     people who mention you that you are GONE."""
-
-    global COUNT_MSG
-    global USERS
-    if not is_redis_alive():
-        return
-
-    IsAway = await is_gone()
-
-    if mention.message.mentioned and not (await mention.get_sender()).bot:
-        if IsAway is True:
-            Reason = await gone_reason()
-            Message = "I am an Auto-Reply Bot, my boss is currently not there from his desk but will respond to your message promptly upon return"
-
-            if Reason != "no reason":
-                Message = Message + "\n\nReason: ```" + Reason + "```"
-
-            if mention.sender_id not in USERS:
-                await mention.reply(Message)
-                USERS.update({mention.sender_id: 1})
-                COUNT_MSG = COUNT_MSG + 1
-            elif mention.sender_id in USERS:
-                if USERS[mention.sender_id] % 10 == 0:
-                    await mention.reply("I am an Auto-Reply Bot, my boss is still not there from his desk.")
-                    USERS[mention.sender_id] = USERS[mention.sender_id] + 1
-                    COUNT_MSG = COUNT_MSG + 1
-                else:
-                    USERS[mention.sender_id] = USERS[mention.sender_id] + 1
-                    COUNT_MSG = COUNT_MSG + 1
+# @register(incoming=True, disable_edited=True, disable_errors=True)
+# @grp_exclude()
+# async def mention_gone(mention):
+#     """ This function takes care of notifying the
+#      people who mention you that you are GONE."""
+#
+#     global COUNT_MSG
+#     global USERS
+#     if not is_redis_alive():
+#         return
+#
+#     IsAway = await is_gone()
+#
+#     if mention.message.mentioned and not (await mention.get_sender()).bot:
+#         if IsAway is True:
+#             Reason = await gone_reason()
+#             Message = "I am an Auto-Reply Bot, my boss is currently not there from his desk but will respond to your message promptly upon return"
+#
+#             if Reason != "no reason":
+#                 Message = Message + "\n\nReason: ```" + Reason + "```"
+#
+#             if mention.sender_id not in USERS:
+#                 await mention.reply(Message)
+#                 USERS.update({mention.sender_id: 1})
+#                 COUNT_MSG = COUNT_MSG + 1
+#             elif mention.sender_id in USERS:
+#                 if USERS[mention.sender_id] % 10 == 0:
+#                     await mention.reply("I am an Auto-Reply Bot, my boss is still not there from his desk.")
+#                     USERS[mention.sender_id] = USERS[mention.sender_id] + 1
+#                     COUNT_MSG = COUNT_MSG + 1
+#                 else:
+#                     USERS[mention.sender_id] = USERS[mention.sender_id] + 1
+#                     COUNT_MSG = COUNT_MSG + 1
 
 
 @register(incoming=True, disable_errors=True)
@@ -64,7 +64,7 @@ async def gone_on_pm(gone_pm):
     if gone_pm.is_private and not (await gone_pm.get_sender()).bot:
         if IsAway is True:
             Reason = await gone_reason()
-            Message = "I am an Auto-Reply Bot, my boss is currently not there from his desk but will respond to your message promptly upon return"
+            Message = "I am an Auto-Reply Bot, my boss is currently away from Telegram but will respond to your message promptly upon return."
 
             if Reason != "no reason":
                 Message = Message + "\n\nReason: ```" + Reason + "```"
@@ -74,7 +74,7 @@ async def gone_on_pm(gone_pm):
                 USERS.update({gone_pm.sender_id: 1})
                 COUNT_MSG = COUNT_MSG + 1
             elif gone_pm.sender_id in USERS:
-                if USERS[gone_pm.sender_id] % 10 == 0:
+                if USERS[gone_pm.sender_id] % 50 == 0:
                     await gone_pm.reply(Message)
                     USERS[gone_pm.sender_id] = USERS[gone_pm.sender_id] + 1
                     COUNT_MSG = COUNT_MSG + 1
